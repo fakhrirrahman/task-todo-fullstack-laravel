@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
-    // Daftar semua task (untuk semua role)
     public function index()
     {
         $user = Auth::user();
@@ -19,7 +18,6 @@ class TaskController extends Controller
         return view('tasks.index', compact('tasks', 'user'));
     }
 
-    // Halaman form create task (Pelaksana)
     public function create()
     {
         $user = Auth::user();
@@ -32,7 +30,6 @@ class TaskController extends Controller
         return view('tasks.create', compact('leaders'));
     }
 
-    // Simpan task baru
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -58,7 +55,6 @@ class TaskController extends Controller
             'deadline' => $request->deadline,
         ]);
 
-        // ✅ Catat history submit
         TaskHistory::create([
             'task_id' => $task->id,
             'action_by' => $user->id,
@@ -114,7 +110,6 @@ class TaskController extends Controller
             'status' => Task::STATUS['Submitted'],
         ]);
 
-        // ✅ Catat history update
         TaskHistory::create([
             'task_id' => $task->id,
             'action_by' => $user->id,
@@ -125,7 +120,6 @@ class TaskController extends Controller
         return redirect()->route('tasks.index')->with('success', 'Task berhasil diperbarui dan dikirim ulang.');
     }
 
-    // Leader review task
     public function review(Request $request, $id)
     {
         $user = Auth::user();
@@ -147,7 +141,6 @@ class TaskController extends Controller
         if ($request->action === 'approve') {
             $task->update(['status' => Task::STATUS['Approve by Leader']]);
 
-            // ✅ Catat history approve
             TaskHistory::create([
                 'task_id' => $task->id,
                 'action_by' => $user->id,
@@ -157,7 +150,6 @@ class TaskController extends Controller
         } else {
             $task->update(['status' => Task::STATUS['Revision']]);
 
-            // ✅ Catat history revision
             TaskHistory::create([
                 'task_id' => $task->id,
                 'action_by' => $user->id,
@@ -169,7 +161,6 @@ class TaskController extends Controller
         return redirect()->route('tasks.index')->with('success', 'Task berhasil direview.');
     }
 
-    // Pelaksana update progress
     public function progress(Request $request, $id)
     {
         $user = Auth::user();
@@ -179,7 +170,6 @@ class TaskController extends Controller
             abort(403, 'Hanya pelaksana task ini yang bisa mengupdate progress.');
         }
 
-        // hanya boleh update progress setelah Leader menyetujui (Approve by Leader)
         if (!in_array($task->status, [Task::STATUS['Approve by Leader'], Task::STATUS['In Progress']])) {
             abort(403, 'Task harus disetujui oleh Leader sebelum Pelaksana mengupdate progress.');
         }
@@ -195,7 +185,6 @@ class TaskController extends Controller
             'progress_by' => $user->id,
         ]);
 
-        // ✅ Catat history update progress
         TaskHistory::create([
             'task_id' => $task->id,
             'action_by' => $user->id,
@@ -206,7 +195,6 @@ class TaskController extends Controller
         return redirect()->route('tasks.index')->with('success', 'Progress diperbarui.');
     }
 
-    // Leader koreksi progress
     public function override(Request $request, $id)
     {
         $user = Auth::user();
@@ -229,7 +217,6 @@ class TaskController extends Controller
             'status' => $request->progress >= 100 ? Task::STATUS['Completed'] : Task::STATUS['In Progress'],
         ]);
 
-        // ✅ Catat history koreksi progress
         TaskHistory::create([
             'task_id' => $task->id,
             'action_by' => $user->id,
@@ -240,7 +227,6 @@ class TaskController extends Controller
         return redirect()->route('tasks.index')->with('success', 'Progress dikoreksi.');
     }
 
-    // Selesaikan task
     public function complete($id)
     {
         $user = Auth::user();
@@ -259,7 +245,6 @@ class TaskController extends Controller
             'progress_by' => $user->id,
         ]);
 
-        // ✅ Catat history complete
         TaskHistory::create([
             'task_id' => $task->id,
             'action_by' => $user->id,
@@ -270,7 +255,6 @@ class TaskController extends Controller
         return redirect()->route('tasks.index')->with('success', 'Task diselesaikan.');
     }
 
-    // Manager monitor semua task
     public function monitor()
     {
         $user = Auth::user();
@@ -278,7 +262,6 @@ class TaskController extends Controller
         if (!$user->hasRole('manager')) {
             abort(403, 'Hanya Manager yang bisa memonitor task.');
         }
-        // Manager hanya melihat task yang sudah disetujui oleh Leader
         $tasks = Task::with(['creator', 'leader', 'progressBy'])
             ->where('status', Task::STATUS['Approve by Leader'])
             ->latest()
