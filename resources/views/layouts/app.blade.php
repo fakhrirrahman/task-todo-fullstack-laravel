@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ config('app.name', 'Task Management System') }}</title>
+
+    {{-- Vite Assets --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+
+<body class="min-h-screen flex flex-col bg-gray-100 text-gray-800">
+    {{-- Navbar --}}
+    <nav class="bg-blue-600 text-white shadow">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="{{ url('/') }}" class="font-bold text-lg">
+                Task System
+            </a>
+
+            <div class="space-x-4">
+                @auth
+                    <a href="{{ route('tasks.index') }}" class="hover:underline">Daftar Task</a>
+                    <form action="{{ route('logout') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="hover:underline text-red-200">Logout</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="hover:underline">Login</a>
+                @endauth
+            </div>
+        </div>
+    </nav>
+
+    {{-- Main Content --}}
+    <main class="flex-grow container mx-auto px-4 py-6">
+        @if (session('success'))
+            <div class="bg-green-100 text-green-700 border border-green-400 px-4 py-3 rounded mb-4">
+                {{ session('success') }}
+            </div>
+        @elseif(session('error'))
+            <div class="bg-red-100 text-red-700 border border-red-400 px-4 py-3 rounded mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @yield('content')
+    </main>
+
+    {{-- Footer --}}
+    <footer class="bg-blue-600 text-white py-4 text-center">
+        <p class="text-sm">&copy; {{ date('Y') }} Task Management System</p>
+    </footer>
+</body>
+
+</html>

@@ -13,7 +13,7 @@ class Task extends Model
 
     const STATUS = [
         'Submitted' => 'Submitted',
-        'Revission' => 'Revision',
+        'Revision' => 'Revision',
         'Approve by Leader' => 'Approve by Leader',
         'In Progress' => 'In Progress',
         'Completed' => 'Completed',
