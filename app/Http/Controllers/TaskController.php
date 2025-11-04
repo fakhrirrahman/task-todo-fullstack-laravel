@@ -69,6 +69,62 @@ class TaskController extends Controller
         return redirect()->route('tasks.index')->with('success', 'Task berhasil dikirim.');
     }
 
+    public function edit($id)
+    {
+        $user = Auth::user();
+        $task = Task::findOrFail($id);
+
+        if (
+            !$user->hasRole('pelaksana') ||
+            $task->created_by != $user->id ||
+            $task->status != Task::STATUS['Revision']
+        ) {
+            abort(403, 'Hanya Pelaksana dari task ini yang bisa mengedit pada status Revision.');
+        }
+
+        $leaders = User::role('leader')->get();
+        return view('tasks.edit', compact('task', 'leaders'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = Auth::user();
+        $task = Task::findOrFail($id);
+
+        if (
+            !$user->hasRole('pelaksana') ||
+            $task->created_by != $user->id ||
+            $task->status != Task::STATUS['Revision']
+        ) {
+            abort(403, 'Hanya Pelaksana dari task ini yang bisa mengupdate pada status Revision.');
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'assigned_leader' => 'required|exists:users,id',
+            'deadline' => 'required|date',
+        ]);
+
+        $task->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'assigned_leader' => $request->assigned_leader,
+            'deadline' => $request->deadline,
+            'status' => Task::STATUS['Submitted'],
+        ]);
+
+        // ✅ Catat history update
+        TaskHistory::create([
+            'task_id' => $task->id,
+            'action_by' => $user->id,
+            'action' => TaskHistory::ACTIONS['submit'],
+            'note' => 'Task diperbarui dan dikirim ulang ke Leader.',
+        ]);
+
+        return redirect()->route('tasks.index')->with('success', 'Task berhasil diperbarui dan dikirim ulang.');
+    }
+
     // Leader review task
     public function review(Request $request, $id)
     {
@@ -123,6 +179,11 @@ class TaskController extends Controller
             abort(403, 'Hanya pelaksana task ini yang bisa mengupdate progress.');
         }
 
+        // hanya boleh update progress setelah Leader menyetujui (Approve by Leader)
+        if (!in_array($task->status, [Task::STATUS['Approve by Leader'], Task::STATUS['In Progress']])) {
+            abort(403, 'Task harus disetujui oleh Leader sebelum Pelaksana mengupdate progress.');
+        }
+
         if ($request->isMethod('get')) {
             return view('tasks.progress', compact('task'));
         }
@@ -165,6 +226,7 @@ class TaskController extends Controller
         $task->update([
             'progress' => $request->progress,
             'progress_by' => $user->id,
+            'status' => $request->progress >= 100 ? Task::STATUS['Completed'] : Task::STATUS['In Progress'],
         ]);
 
         // ✅ Catat history koreksi progress
@@ -216,8 +278,11 @@ class TaskController extends Controller
         if (!$user->hasRole('manager')) {
             abort(403, 'Hanya Manager yang bisa memonitor task.');
         }
-
-        $tasks = Task::with(['creator', 'leader', 'progressBy'])->latest()->get();
+        // Manager hanya melihat task yang sudah disetujui oleh Leader
+        $tasks = Task::with(['creator', 'leader', 'progressBy'])
+            ->where('status', Task::STATUS['Approve by Leader'])
+            ->latest()
+            ->get();
         return view('tasks.monitor', compact('tasks'));
     }
 

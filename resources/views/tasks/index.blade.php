@@ -34,6 +34,10 @@
                         <td class="p-2 border">{{ $task->leader?->name ?? '-' }}</td>
                         <td class="p-2 border space-x-2">
 
+                            @if ($user)
+                                <a href="{{ route('tasks.history', $task->id) }}"
+                                    class="text-gray-600 hover:underline">History</a>
+                            @endif
                             {{-- Edit: hanya Pelaksana yang buat task dan sedang direvisi --}}
                             @if (
                                 $user &&
