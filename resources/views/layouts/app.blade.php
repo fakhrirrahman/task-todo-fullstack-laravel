@@ -19,6 +19,9 @@
             <div class="space-x-4">
                 @auth
                     <a href="{{ route('tasks.index') }}" class="hover:underline">Daftar Task</a>
+                    @if (auth()->user()->hasRole('manager'))
+                        <a href="{{ route('tasks.monitor') }}" class="hover:underline">Monitor</a>
+                    @endif
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="hover:underline text-red-200">Logout</button>

@@ -15,12 +15,11 @@ class TaskController extends Controller
         $user = Auth::user();
         $tasks = Task::with(['creator', 'leader', 'progressBy'])->latest()->get();
 
-        // Menambahkan flag isApprovedByLeader untuk setiap task
         foreach ($tasks as $task) {
-            $task->isApprovedByLeader = \App\Models\TaskHistory::where('task_id', $task->id)
-                ->where('action', \App\Models\TaskHistory::ACTIONS['approve'])
+            $task->isApprovedByLeader = TaskHistory::where('task_id', $task->id)
+                ->where('action', TaskHistory::ACTIONS['approve'])
                 ->whereHas('actionBy', function ($q) {
-                    $q->role('leader'); // Pastikan ini sesuai dengan implementasi role di app kamu
+                    $q->role('leader');
                 })
                 ->exists();
         }
