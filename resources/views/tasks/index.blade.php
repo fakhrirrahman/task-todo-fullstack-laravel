@@ -8,7 +8,6 @@
     <div class="container mx-auto p-6">
         <h1 class="text-2xl font-semibold mb-4">Daftar Task</h1>
 
-        {{-- Tombol tambah task, hanya untuk Pelaksana --}}
         @if ($user && $user->hasRole('pelaksana'))
             <a href="{{ route('tasks.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                 + Buat Task Baru
@@ -38,7 +37,6 @@
                                 <a href="{{ route('tasks.history', $task->id) }}"
                                     class="text-gray-600 hover:underline">History</a>
                             @endif
-                            {{-- Edit: hanya Pelaksana yang buat task dan sedang direvisi --}}
                             @if (
                                 $user &&
                                     $user->hasRole('pelaksana') &&
@@ -48,7 +46,6 @@
                                     class="text-blue-600 hover:underline">Edit</a>
                             @endif
 
-                            {{-- Review: hanya Leader yang ditugaskan --}}
                             @if (
                                 $user &&
                                     $user->hasRole('leader') &&
@@ -58,7 +55,6 @@
                                     class="text-yellow-600 hover:underline">Review</a>
                             @endif
 
-                            {{-- Update Progress: hanya Pelaksana yang buat task --}}
                             @if (
                                 $user &&
                                     $user->hasRole('pelaksana') &&
@@ -68,7 +64,6 @@
                                     class="text-green-600 hover:underline">Progress</a>
                             @endif
 
-                            {{-- Override progress: hanya Leader yang ditugaskan --}}
                             @if (
                                 $user &&
                                     $user->hasRole('leader') &&
@@ -78,7 +73,6 @@
                                     class="text-indigo-600 hover:underline">Override</a>
                             @endif
 
-                            {{-- Complete: Pelaksana atau Leader boleh menyelesaikan bila progress == 100 --}}
                             @if (
                                 $task->progress == 100 &&
                                     $user &&
