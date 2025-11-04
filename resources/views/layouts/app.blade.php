@@ -35,11 +35,13 @@
 
     <main class="flex-grow container mx-auto px-4 py-6">
         @if (session('success'))
-            <div class="bg-green-100 text-green-700 border border-green-400 px-4 py-3 rounded mb-4">
+            <div id="alert-message"
+                class="bg-green-100 text-green-700 border border-green-400 px-4 py-3 rounded mb-4 transition-opacity duration-500">
                 {{ session('success') }}
             </div>
         @elseif(session('error'))
-            <div class="bg-red-100 text-red-700 border border-red-400 px-4 py-3 rounded mb-4">
+            <div id="alert-message"
+                class="bg-red-100 text-red-700 border border-red-400 px-4 py-3 rounded mb-4 transition-opacity duration-500">
                 {{ session('error') }}
             </div>
         @endif
@@ -50,6 +52,19 @@
     <footer class="bg-blue-600 text-white py-4 text-center">
         <p class="text-sm">&copy; {{ date('Y') }} Task Management System</p>
     </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const alert = document.getElementById('alert-message');
+            if (alert) {
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                }, 2000);
+            }
+        });
+    </script>
 </body>
 
 </html>

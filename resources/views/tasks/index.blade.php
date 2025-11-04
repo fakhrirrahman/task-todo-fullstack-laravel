@@ -32,11 +32,11 @@
                     <div class="flex items-start justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-slate-900">{{ $task->title }}</h3>
-                            <p class="text-sm text-gray-500 mt-1">{{ 
-                                Str::limit($task->description, 100) }}</p>
+                            <p class="text-sm text-gray-500 mt-1">{{ Str::limit($task->description, 100) }}</p>
                         </div>
                         <div class="text-right">
-                            <span class="px-3 py-1 rounded-full text-sm font-medium {{ $badge }}">{{ $task->status }}</span>
+                            <span
+                                class="px-3 py-1 rounded-full text-sm font-medium {{ $badge }}">{{ $task->status }}</span>
                             <div class="text-xs text-gray-400 mt-1">Leader: {{ $task->leader?->name ?? '-' }}</div>
                         </div>
                     </div>
@@ -47,40 +47,74 @@
                             <div class="text-sm font-medium text-gray-700">{{ $task->progress }}%</div>
                         </div>
                         <div class="w-full bg-gray-100 h-3 rounded overflow-hidden">
-                            <div class="h-3 bg-gradient-to-r from-green-400 to-green-600" style="width: {{ $task->progress }}%"></div>
+                            <div class="h-3 bg-gradient-to-r from-green-400 to-green-600"
+                                style="width: {{ $task->progress }}%"></div>
                         </div>
                     </div>
 
                     <div class="mt-4 flex flex-wrap items-center gap-2">
-                        <a href="{{ route('tasks.history', $task->id) }}" class="inline-flex items-center px-3 py-1.5 bg-gray-50 border rounded text-sm text-gray-700 hover:bg-gray-100">History</a>
+                        <a href="{{ route('tasks.history', $task->id) }}"
+                            class="inline-flex items-center px-3 py-1.5 bg-gray-50 border rounded text-sm text-gray-700 hover:bg-gray-100">History</a>
 
-                        @if ($user && $user->hasRole('pelaksana') && $task->status === Task::STATUS['Revision'] && $task->created_by === $user->id)
-                            <a href="{{ route('tasks.edit', $task->id) }}" class="inline-flex items-center px-3 py-1.5 bg-blue-50 border rounded text-sm text-blue-600 hover:bg-blue-100">Edit</a>
+                        @if (
+                            $user &&
+                                $user->hasRole('pelaksana') &&
+                                $task->status === Task::STATUS['Revision'] &&
+                                $task->created_by === $user->id)
+                            <a href="{{ route('tasks.edit', $task->id) }}"
+                                class="inline-flex items-center px-3 py-1.5 bg-blue-50 border rounded text-sm text-blue-600 hover:bg-blue-100">Edit</a>
                         @endif
 
-                        @if ($user && $user->hasRole('leader') && in_array($task->status, [Task::STATUS['Submitted'], Task::STATUS['Revision']]) && $task->assigned_leader === $user->id)
-                            <a href="{{ route('tasks.review', $task->id) }}" class="inline-flex items-center px-3 py-1.5 bg-yellow-50 border rounded text-sm text-yellow-700 hover:bg-yellow-100">Review</a>
+                        @if (
+                            $user &&
+                                $user->hasRole('leader') &&
+                                in_array($task->status, [Task::STATUS['Submitted'], Task::STATUS['Revision']]) &&
+                                $task->assigned_leader === $user->id)
+                            <a href="{{ route('tasks.review', $task->id) }}"
+                                class="inline-flex items-center px-3 py-1.5 bg-yellow-50 border rounded text-sm text-yellow-700 hover:bg-yellow-100">Review</a>
                         @endif
 
-                        @if ($user && $user->hasRole('pelaksana') && in_array($task->status, [Task::STATUS['Approve by Leader'], Task::STATUS['In Progress']]) && $task->created_by === $user->id)
-                            <a href="{{ route('tasks.progress', $task->id) }}" class="inline-flex items-center px-3 py-1.5 bg-green-50 border rounded text-sm text-green-700 hover:bg-green-100">Progress</a>
+                        @if (
+                            $user &&
+                                $user->hasRole('pelaksana') &&
+                                in_array($task->status, [Task::STATUS['Approve by Leader'], Task::STATUS['In Progress']]) &&
+                                $task->created_by === $user->id)
+                            <a href="{{ route('tasks.progress', $task->id) }}"
+                                class="inline-flex items-center px-3 py-1.5 bg-green-50 border rounded text-sm text-green-700 hover:bg-green-100">Progress</a>
                         @endif
 
-                        @if ($user && $user->hasRole('leader') && $task->status === Task::STATUS['In Progress'] && $task->assigned_leader === $user->id)
-                            <a href="{{ route('tasks.override', $task->id) }}" class="inline-flex items-center px-3 py-1.5 bg-indigo-50 border rounded text-sm text-indigo-700 hover:bg-indigo-100">Override</a>
+                        @if (
+                            $user &&
+                                $user->hasRole('leader') &&
+                                $task->status === Task::STATUS['In Progress'] &&
+                                $task->assigned_leader === $user->id)
+                            <a href="{{ route('tasks.override', $task->id) }}"
+                                class="inline-flex items-center px-3 py-1.5 bg-indigo-50 border rounded text-sm text-indigo-700 hover:bg-indigo-100">Override</a>
                         @endif
 
-                        @if ($task->progress == 100 && $user && (($user->hasRole('pelaksana') && $task->created_by === $user->id) || ($user->hasRole('leader') && $task->assigned_leader === $user->id)))
+                        @if (
+                            $task->progress == 100 &&
+                                $user &&
+                                (($user->hasRole('pelaksana') && $task->created_by === $user->id) ||
+                                    ($user->hasRole('leader') && $task->assigned_leader === $user->id)))
                             <form action="{{ route('tasks.complete', $task->id) }}" method="POST" class="inline">
                                 @csrf
-                                <button class="px-3 py-1.5 bg-gray-800 text-white rounded text-sm hover:bg-black">Selesaikan</button>
+                                <button
+                                    class="px-3 py-1.5 bg-gray-800 text-white rounded text-sm hover:bg-black">Selesaikan</button>
                             </form>
                         @endif
 
-                        @if ($user && $user->hasRole('pelaksana') && $task->created_by === $user->id && $task->status !== Task::STATUS['Approve by Leader'])
-                            <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus task ini?');">
+                        @if (
+                            $user &&
+                                $user->hasRole('pelaksana') &&
+                                $task->created_by === $user->id &&
+                                $task->status !== Task::STATUS['Approve by Leader']
+                        )
+                            <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline"
+                                onsubmit="return confirm('Hapus task ini?');">
                                 @csrf
-                                <button class="px-3 py-1.5 bg-red-50 text-red-700 border rounded text-sm hover:bg-red-100">Hapus</button>
+                                <button
+                                    class="px-3 py-1.5 bg-red-50 text-red-700 border rounded text-sm hover:bg-red-100">Hapus</button>
                             </form>
                         @endif
 
