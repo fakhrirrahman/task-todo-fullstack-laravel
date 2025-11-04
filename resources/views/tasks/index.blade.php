@@ -58,7 +58,7 @@
                             @if (
                                 $user &&
                                     $user->hasRole('pelaksana') &&
-                                    $task->status === Task::STATUS['Approve by Leader'] &&
+                                    in_array($task->status, [Task::STATUS['Approve by Leader'], Task::STATUS['In Progress']]) &&
                                     $task->created_by === $user->id)
                                 <a href="{{ route('tasks.progress', $task->id) }}"
                                     class="text-green-600 hover:underline">Progress</a>
@@ -81,6 +81,15 @@
                                 <form action="{{ route('tasks.complete', $task->id) }}" method="POST" class="inline">
                                     @csrf
                                     <button class="text-gray-800 hover:underline">Selesaikan</button>
+                                </form>
+                            @endif
+
+                            @if ($user && $user->hasRole('pelaksana') && $task->created_by === $user->id && !$task->isApprovedByLeader)
+                                <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline"
+                                    onsubmit="return confirm('Hapus task ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="text-red-600 hover:underline">Hapus</button>
                                 </form>
                             @endif
                         </td>

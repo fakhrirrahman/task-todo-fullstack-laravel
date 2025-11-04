@@ -50,11 +50,6 @@
                                     Remember me
                                 </label>
                             </div>
-                            <div class="text-sm">
-                                <a href="javascript:void(0);" class="text-blue-600 hover:underline font-semibold">
-                                    Forgot your password?
-                                </a>
-                            </div>
                         </div>
 
                         <div class="!mt-8">
@@ -63,14 +58,6 @@
                                 Sign in
                             </button>
                         </div>
-
-                        <p class="text-slate-900 text-sm !mt-6 text-center">
-                            Don't have an account?
-                            <a href="javascript:void(0);"
-                                class="text-blue-600 hover:underline ml-1 whitespace-nowrap font-semibold">
-                                Register here
-                            </a>
-                        </p>
                     </form>
                 </div>
             </div>

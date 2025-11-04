@@ -15,8 +15,20 @@ class TaskController extends Controller
         $user = Auth::user();
         $tasks = Task::with(['creator', 'leader', 'progressBy'])->latest()->get();
 
+        // Menambahkan flag isApprovedByLeader untuk setiap task
+        foreach ($tasks as $task) {
+            $task->isApprovedByLeader = \App\Models\TaskHistory::where('task_id', $task->id)
+                ->where('action', \App\Models\TaskHistory::ACTIONS['approve'])
+                ->whereHas('actionBy', function ($q) {
+                    $q->role('leader'); // Pastikan ini sesuai dengan implementasi role di app kamu
+                })
+                ->exists();
+        }
+
         return view('tasks.index', compact('tasks', 'user'));
     }
+
+
 
     public function create()
     {
@@ -275,5 +287,28 @@ class TaskController extends Controller
         $histories = TaskHistory::with('actionBy')->where('task_id', $id)->latest()->get();
 
         return view('tasks.history', compact('task', 'histories'));
+    }
+
+    public function destroy($id)
+    {
+        $user = Auth::user();
+        $task = Task::findOrFail($id);
+
+        if (!$user->hasRole('pelaksana') || $task->created_by != $user->id) {
+            abort(403, 'Hanya Pelaksana pembuat task yang dapat menghapus.');
+        }
+
+        $isApproved = \App\Models\TaskHistory::where('task_id', $task->id)
+            ->where('action', TaskHistory::ACTIONS['approve'])
+            ->exists();
+
+        if ($isApproved) {
+            abort(403, 'Task sudah disetujui Leader dan tidak dapat dihapus.');
+        }
+
+        TaskHistory::where('task_id', $task->id)->delete();
+        $task->delete();
+
+        return redirect()->route('tasks.index')->with('success', 'Task berhasil dihapus.');
     }
 }

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TaskController;
 
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -22,6 +23,7 @@ Route::middleware(['auth'])->group(function () {
     Route::match(['get', 'post'], '/tasks/{id}/progress', [TaskController::class, 'progress'])->name('tasks.progress');
     Route::match(['get', 'post'], '/tasks/{id}/override', [TaskController::class, 'override'])->name('tasks.override');
     Route::post('/tasks/{id}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
+    Route::post('/tasks/{id}/delete', [TaskController::class, 'destroy'])->name('tasks.destroy');
     Route::get('/tasks/monitor', [TaskController::class, 'monitor'])->name('tasks.monitor');
     Route::get('/tasks/{id}/history', [TaskController::class, 'history'])->name('tasks.history');
 });
